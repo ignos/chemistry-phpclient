@@ -212,14 +212,19 @@ class CMISService extends CMISRepositoryWrapper {
 	/**
 	 * @internal
 	 */
-	function getPropertyType($typeId, $propertyId) {
-		if (isset($this->_type_cache[$typeId])) {
-			if ($this->_type_cache[$typeId]->properties) {
-				return $this->_type_cache[$typeId]->properties[$propertyId]["cmis:propertyType"];
+	function getPropertyType($typeIds, $propertyId) {
+		foreach ($typeIds as $typeId) {
+			$typeDefinition = null;
+			if (isset($this->_type_cache[$typeId])) {
+				$typeDefinition = $this->_type_cache[$typeId];
+			} else {
+				$typeDefinition = $this->getTypeDefinition($typeId);
+			}
+			if (isset($typeDefinition->properties[$propertyId])) {
+				return $typeDefinition->properties[$propertyId]["cmis:propertyType"];
 			}
 		}
-		$obj = $this->getTypeDefinition($typeId);
-		return $obj->properties[$propertyId]["cmis:propertyType"];
+		throw new Exception('Property type not found for ' . $propertyId . '.');
 	}
 
 	/**
@@ -237,7 +242,7 @@ class CMISService extends CMISRepositoryWrapper {
 	 * @internal
 	 */
 	function getTitle($objectId) {
-		if ($this->_title_cache[$objectId]) {
+		if (isset($this->_title_cache[$objectId])) {
 			return $this->_title_cache[$objectId];
 		}
 		$obj = $this->getObject($objectId);
@@ -674,8 +679,12 @@ xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/">
 		}
 		$propertyContent = "";
 		$hash_values = array ();
+		$objectTypes[] = $objectType;
+		if (array_key_exists('cmis:secondaryObjectTypeIds', $propMap)) {
+			$objectTypes = array_merge($objectTypes, $propMap['cmis:secondaryObjectTypeIds']);
+		}
 		foreach ($propMap as $propId => $propValue) {
-			$hash_values['propertyType'] = $propertyTypeMap[$this->getPropertyType($objectType, $propId)];
+			$hash_values['propertyType'] = $propertyTypeMap[$this->getPropertyType($objectTypes, $propId)];
 			$hash_values['propertyId'] = $propId;
 			if (is_array($propValue)) {
 				$first_one = true;
