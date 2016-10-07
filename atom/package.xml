@@ -16,12 +16,12 @@
 	</maintainers>
 
 	<release>
-		<version>0.2.0ignos</version>
-		<date>2016-09-29</date>
+		<version>0.2.1ignos</version>
+		<date>2016-10-07</date>
 		<license>Apache License</license>
 		<state>beta</state>
 		<notes>
-			This release fixes a regression bug that avoids you to access multivalued properties.
+			This release added support for updateing added properties from aspects.
 		</notes>
 		<filelist>
 			<dir name="/" baseinstalldir="cmis-lib">
